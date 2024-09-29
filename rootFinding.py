@@ -8,6 +8,7 @@ Created on Sat Sep 28 11:04:04 2024
 
 import matplotlib.pyplot as plt
 import numpy as np
+import math
 
 def f1(x):
     return  (x**3) - (5*(x**2)) + (2*x)
@@ -168,86 +169,181 @@ def secant_method(function, initial_guess_1, initial_guess_2, tolerance, max_ite
     # If the maximum number of iterations is reached, return the last guess
     return current,iterationData
 
-def mullers_method(function, initial_guess_1, initial_guess_2, initial_guess_3, tolerance, max_iter):
+def mullers_method(function, a, b, c, tolerance, max_iter):
     """
     Find the root of the function `function` using Müller’s method
     and print iteration details in a table.
 
     Parameters:
     function : callable - the function for which we are finding the root
-    initial_guess_1 : float - the first initial guess
-    initial_guess_2 : float - the second initial guess
-    initial_guess_3 : float - the third initial guess
+    a, b, c : float - three initial guesses
     tolerance : float - the tolerance for stopping criterion
     max_iter : int - maximum number of iterations
 
     Returns:
     float - the estimated root of the function
     """
-
-    x0, x1, x2 = initial_guess_1, initial_guess_2, initial_guess_3
-    iterationData = {}
-
+    
     # Print table header
     print(f"{'Iteration':<10}{'p':<20}{'Function Value':<20}{'Absolute Error':<20}{'Relative Error':<20}")
+    iterationData = {}
 
     for i in range(max_iter):
-        f0, f1, f2 = function(x0), function(x1), function(x2)
+        f1 = function(a)
+        f2 = function(b)
+        f3 = function(c)
+        
+        d1 = f1 - f3
+        d2 = f2 - f3
+        h1 = a - c
+        h2 = b - c
 
-        # Calculate the denominator
-        denominator = (f1 - f0) * (f2 - f0) * (f2 - f1)
+        a0 = f3
+        a1 = (d2 * h1**2 - d1 * h2**2) / (h1 * h2 * (h1 - h2))
+        a2 = (d1 * h2 - d2 * h1) / (h1 * h2 * (h1 - h2))
 
-        # Check if denominator is zero
-        if denominator == 0:
-            raise ValueError("Denominator is zero. No solution found.")
+        # Calculate potential roots
+        sqrt_term = math.sqrt(a1**2 - 4 * a0 * a2)
+        if a1 + abs(sqrt_term) != 0:
+            x = (-2 * a0) / (a1 + abs(sqrt_term))
+        else:
+            x = float('inf')  # Avoid division by zero
+        
+        if a1 - abs(sqrt_term) != 0:
+            y = (-2 * a0) / (a1 - abs(sqrt_term))
+        else:
+            y = float('inf')  # Avoid division by zero
 
-        # Calculate the next guess using Müller’s formula
-        h1 = f1 - f0
-        h2 = f2 - f0
-        d = (h2 * h1 * (f1 - f0)) / denominator
-        next_guess = x2 - (h2 * h1) / (h2 + h1 + (2 * d))
-
-        # Calculate absolute and relative errors
-        absolute_error = abs(function(next_guess))
-        relative_error = abs((next_guess - x2) / next_guess) if next_guess != 0 else float('inf')
-
-        # Print iteration details in a nice table format
-        print(f"{i + 1:<10}{next_guess:<20.10f}{function(next_guess):<20.10f}{absolute_error:<20.10f}{relative_error:<20.10f}")
-        iterationData[i] = [next_guess,absolute_error,relative_error]
+        # Taking the root which is closer to c
+        result = x + c if x >= y else y + c
         
         # Check for convergence
-        if absolute_error < tolerance:
-            return next_guess,iterationData
+        absolute_error = abs(function(result))
+        relative_error = abs((result - c) / result) if result != 0 else float('inf')
 
-        # Update guesses for the next iteration
-        x0, x1, x2 = x1, x2, next_guess
+        # Print iteration details in a nice table format
+        print(f"{i + 1:<10}{result:<20.10f}{absolute_error:<20.10f}{relative_error:<20.10f}")
+        iterationData[i] = [result,absolute_error,relative_error]
 
-    # If the maximum number of iterations is reached, return the last guess
-    return next_guess,iterationData
+        # Checking for resemblance to two decimal places
+        if round(result, 2) == round(c, 2):
+            break
+
+        a, b, c = b, c, result  # Update guesses
+
+    if i >= max_iter:
+        print("Root can't be found using Müller method")
+    else:
+        print(f"The root is approximately: {result}")
+
+    return result,iterationData
         
+   
+def printHeader(name):
+    print("==================================================================================\n")
+    print("\t\t\t\t\t\t\t%s\n" %(name))
+    print("==================================================================================\n")
     
+def extractValues(method):
+    
+    i = 0
+    BX = []
+    BY = []
+    
+    for iteration in method.values():
+        #print(i,iteration[0])
+        BX.append(i)
+        BY.append(iteration[0])
+        i+=1
+    return BX, BY
+    
+def graphConvergence(bisection, newtons, secant, mullers, figureTitle):
+    
+  
+    BX,BY = extractValues(bisection) 
+    NX,NY = extractValues(newtons)
+    SX,SY = extractValues(secant)
+    MX,MY = extractValues(mullers)  
+    
+    fig,ax = plt.subplots(2,2)
+    ax[0,0].plot(BX,BY)
+    ax[0, 0].set_title('Bisection Convergence Plot')
+    ax[0,0].set(ylabel='Approximation value')
+    ax[0,1].plot(NX,NY)
+    ax[0, 1].set_title('Newtons Convergence Plot')
+    ax[1,0].plot(SX,SY)
+    ax[1, 0].set_title('Secant Convergence Plot')
+    ax[1,0].set(xlabel='#-iteration', ylabel='Approximation value')
+    ax[1,1].plot(MX,MY)
+    ax[1, 1].set_title('Mullers Convergence Plot')
+    ax[1,1].set(xlabel='#-iteration')
+    
+    #for axis in ax.flat:
+        #axis.set(xlabel='#-iteration', ylabel='Approximation value')
+        #axis.label_outer()
+
+     
+    
+    fig.suptitle('%s' %(figureTitle), fontsize=16)
+    fig.tight_layout()
 
 
-
-def main():
+def part_a():
     
             
     a = -10
-    b = 1
+    b = 9
     tol = 1e-4
     maxIter = 100000
     
-    x = np.linspace(-9, 7,1000)
-    y = f1(x)
+    #x = np.linspace(-1, 5.5,100000)
+    #y = f1(x)
+    
+    #plt.plot(x,y)
+    printHeader("Bisection Method")
+    bisection_answer,b_iterData = bisectionMethod(f1, a, b, tol, maxIter)
+    
+
+    
+    initial_guess = 5
+    printHeader("Newton's Method")
+    newtons_answer, n_iterData = newtons_method(f1, df1dx, initial_guess, tol, maxIter)
+    printHeader("Secant Method")
+    secant_answer, s_iterData = secant_method(f1, 0.5, -0.5, tol, maxIter)
+    printHeader("Muller's Method")
+    mullers_answer,m_iterData = mullers_method(f1, -0.5, 0, 0.5, tol, maxIter)
+    
+    printHeader("\t\tPart B")
+    #print(bisection_answer,newtons_answer,secant_answer)
+    
+    #print(m_iterData.values())
+    
+    graphConvergence(b_iterData,n_iterData,s_iterData,m_iterData,"Part A Convergence")
+    
+def part_b():
+    a = -10
+    b = 9
+    tol = 1e-4
+    maxIter = 100000
+    
+    x = np.linspace(-10, 10,100000) #resolution is not enough here. 
+    y = f2(x)
     
     plt.plot(x,y)
-    answer,iterData = bisectionMethod(f1, a, b, tol, maxIter)
+    printHeader("Bisection Method")
+    bisection_answer,b_iterData = bisectionMethod(f2, a, b, tol, maxIter)
     
-    print(answer)
-    
-    print(type(iterData.values()))
+    initial_guess = 3
+    printHeader("Newton's Method")
+    newtons_answer, n_iterData = newtons_method(f2, df2dx, initial_guess, tol, maxIter)
+    printHeader("Secant Method")
+    secant_answer, s_iterData = secant_method(f2, 1, 3, tol, maxIter)
+    printHeader("Muller's Method")
+    mullers_answer,m_iterData = mullers_method(f2, 0, 1, 3, tol, maxIter)
+    graphConvergence(b_iterData,n_iterData,s_iterData,m_iterData,"Part B Convergence")
     
 if __name__ == "__main__":
-    main()
+    part_a()
+    #part_b()
 
     
