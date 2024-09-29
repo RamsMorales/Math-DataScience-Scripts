@@ -85,6 +85,7 @@ def newtons_method(function, derivative, initial_guess, tolerance, maxIter):
     """
     
     current = initial_guess
+    iterationData = {}
     
     # Print table header
     print(f"{'Iteration':<10}{'p':<20}{'Function Value':<20}{'Absolute Error':<20}{'Relative Error':<20}")
@@ -106,15 +107,16 @@ def newtons_method(function, derivative, initial_guess, tolerance, maxIter):
 
         # Print iteration details in a nice table format
         print(f"{i + 1:<10}{next_guess:<20.10f}{function_value:<20.10f}{absolute_error:<20.10f}{relative_error:<20.10f}")
+        iterationData[i] = [current,absolute_error,relative_error]
 
         # Check for convergence
         if absolute_error < tolerance:
-            return next_guess
+            return next_guess,iterationData
 
         current = next_guess  # Update current guess for the next iteration
 
     # If the maximum number of iterations is reached, return the last guess
-    return current
+    return current, iterationData
 
 def secant_method(function, initial_guess_1, initial_guess_2, tolerance, max_iter):
     """
@@ -134,7 +136,7 @@ def secant_method(function, initial_guess_1, initial_guess_2, tolerance, max_ite
 
     current = initial_guess_1
     previous = initial_guess_2
-
+    iterationData = {}
     # Print table header
     print(f"{'Iteration':<10}{'p':<20}{'Function Value':<20}{'Absolute Error':<20}{'Relative Error':<20}")
 
@@ -155,15 +157,16 @@ def secant_method(function, initial_guess_1, initial_guess_2, tolerance, max_ite
 
         # Print iteration details in a nice table format
         print(f"{i + 1:<10}{next_guess:<20.10f}{function_current:<20.10f}{absolute_error:<20.10f}{relative_error:<20.10f}")
-
+        iterationData[i] = [current,absolute_error,relative_error]
+        
         # Check for convergence
         if absolute_error < tolerance:
-            return next_guess
+            return next_guess,iterationData
 
         previous, current = current, next_guess  # Update guesses for the next iteration
 
     # If the maximum number of iterations is reached, return the last guess
-    return current
+    return current,iterationData
 
 def mullers_method(function, initial_guess_1, initial_guess_2, initial_guess_3, tolerance, max_iter):
     """
@@ -183,6 +186,7 @@ def mullers_method(function, initial_guess_1, initial_guess_2, initial_guess_3, 
     """
 
     x0, x1, x2 = initial_guess_1, initial_guess_2, initial_guess_3
+    iterationData = {}
 
     # Print table header
     print(f"{'Iteration':<10}{'p':<20}{'Function Value':<20}{'Absolute Error':<20}{'Relative Error':<20}")
@@ -209,16 +213,17 @@ def mullers_method(function, initial_guess_1, initial_guess_2, initial_guess_3, 
 
         # Print iteration details in a nice table format
         print(f"{i + 1:<10}{next_guess:<20.10f}{function(next_guess):<20.10f}{absolute_error:<20.10f}{relative_error:<20.10f}")
-
+        iterationData[i] = [next_guess,absolute_error,relative_error]
+        
         # Check for convergence
         if absolute_error < tolerance:
-            return next_guess
+            return next_guess,iterationData
 
         # Update guesses for the next iteration
         x0, x1, x2 = x1, x2, next_guess
 
     # If the maximum number of iterations is reached, return the last guess
-    return next_guess
+    return next_guess,iterationData
         
     
 
