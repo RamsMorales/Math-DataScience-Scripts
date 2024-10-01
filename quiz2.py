@@ -19,7 +19,7 @@ import math
 def f1(x):
     return  (x**3) - ((3*(x**2)) * (2 ** -x)) + ((3*x)*(4 ** -x)) - (8** -x)
 def df1dx(x):
-    return ((3*(x**2))) - ((6*x)* (2 ** -x) - math.ln(2) * (2 ** -x) * (3*(x**2))) + (3*(4 ** -x) - math.ln(4) * (4 ** -x) * (3*x)) + math.ln(8) * (8 ** -x) 
+    return ((3*(x**2))) - ((6*x)* (2 ** -x) - math.log(2) * (2 ** -x) * (3*(x**2))) + (3*(4 ** -x) - math.log(4) * (4 ** -x) * (3*x)) + math.log(8) * (8 ** -x) 
 
 def newtons_method(function, derivative, initial_guess, tolerance, maxIter):
     """
@@ -79,10 +79,11 @@ def main():
     
     maxIter = 10
     
-    root = newtons_method(f1,df1dx , initialGuess, tol, maxIter)
+    root,iterData = newtons_method(f1,df1dx , initialGuess, tol, maxIter)
     
-    print("The approximate x within (%f,%f) for the given function is: %.9f\n" % (0 - tol,0 + tol, root))
-    
+    print("=====================================================================================\n")
+    print("The approximate x within (%f,%f) for the given function is: %.9f\n" % (-tol,tol, root))
+    print("=====================================================================================\n")
 if __name__ == "__main__":
     main()
     
