@@ -267,15 +267,15 @@ def graphConvergence(bisection, newtons, secant, mullers, figureTitle):
     
     fig,ax = plt.subplots(2,2)
     ax[0,0].plot(BX,BY)
-    ax[0, 0].set_title('Bisection Convergence Plot')
+    ax[0, 0].set_title('P_0 = 10')
     ax[0,0].set(ylabel='Approximation value')
     ax[0,1].plot(NX,NY)
-    ax[0, 1].set_title('Newtons Convergence Plot')
+    ax[0, 1].set_title('P_0 = 100')
     ax[1,0].plot(SX,SY)
-    ax[1, 0].set_title('Secant Convergence Plot')
+    ax[1, 0].set_title('P_0 = 1000')
     ax[1,0].set(xlabel='#-iteration', ylabel='Approximation value')
     ax[1,1].plot(MX,MY)
-    ax[1, 1].set_title('Mullers Convergence Plot')
+    ax[1, 1].set_title('P_0 = 10000')
     ax[1,1].set(xlabel='#-iteration')
     
     #for axis in ax.flat:
@@ -309,9 +309,9 @@ def part_a():
     printHeader("Newton's Method")
     newtons_answer, n_iterData = newtons_method(f1, df1dx, initial_guess, tol, maxIter)
     printHeader("Secant Method")
-    secant_answer, s_iterData = secant_method(f1, 0.5, -0.5, tol, maxIter)
+    secant_answer, s_iterData = secant_method(f1, -1, 1, tol, maxIter)
     printHeader("Muller's Method")
-    mullers_answer,m_iterData = mullers_method(f1, -0.5, 0, 0.5, tol, maxIter)
+    mullers_answer,m_iterData = mullers_method(f1, -1, 0, 1, tol, maxIter)
     
     printHeader("\t\tPart B")
     #print(bisection_answer,newtons_answer,secant_answer)
@@ -331,19 +331,22 @@ def part_b():
     
     plt.plot(x,y)
     printHeader("Bisection Method")
-    bisection_answer,b_iterData = bisectionMethod(f2, a, b, tol, maxIter)
+    #bisection_answer,b_iterData = bisectionMethod(f2, a, b, tol, maxIter)
     
-    initial_guess = 3
+    initial_guess = 10000
     printHeader("Newton's Method")
-    newtons_answer, n_iterData = newtons_method(f2, df2dx, initial_guess, tol, maxIter)
-    printHeader("Secant Method")
-    secant_answer, s_iterData = secant_method(f2, 1, 3, tol, maxIter)
-    printHeader("Muller's Method")
-    mullers_answer,m_iterData = mullers_method(f2, 0, 1, 3, tol, maxIter)
-    graphConvergence(b_iterData,n_iterData,s_iterData,m_iterData,"Part B Convergence")
+    newtons_answer, n0_iterData = newtons_method(f2, df2dx, 10, tol, maxIter)
+    newtons_answer, n1_iterData = newtons_method(f2, df2dx, 100, tol, maxIter)
+    newtons_answer, n2_iterData = newtons_method(f2, df2dx, 1000, tol, maxIter)
+    newtons_answer, n3_iterData = newtons_method(f2, df2dx, initial_guess, tol, maxIter)
+    #printHeader("Secant Method")
+    #secant_answer, s_iterData = secant_method(f2, 1, 3, tol, maxIter)
+    #printHeader("Muller's Method")
+    #mullers_answer,m_iterData = mullers_method(f2, 0, 1, 3, tol, maxIter)
+    graphConvergence(n0_iterData,n1_iterData,n2_iterData,n3_iterData,"Newton's method tested at P_0 = 10, 100, 1000, 10000")
     
 if __name__ == "__main__":
-    part_a()
-    #part_b()
+    #part_a()
+    part_b()
 
     
