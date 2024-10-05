@@ -13,25 +13,25 @@ def LFactor(dataset: dict, evalPoint: float, x_k: float) ->float:
     numerator = 1
 
     for x in dataset.keys():
-        #print(x)
+
         if x != x_k:
             denominator = denominator * (x_k - x)
             numerator = numerator * (evalPoint - x)
  
                 
     result = float(numerator) / float(denominator)
-    
-   # print(result)
             
     return result
             
 
-def generateLagrangePolynomial(dataset: dict, evalPoint: float) -> float:
+def generateLagrangePolynomial(dataset: dict, evalPoint: float, degree: int) -> float:
     
     
     result = 0
     
-    for x_k in dataset.keys():
+    for i in range(degree + 1):
+        
+        x_k = list(dataset.keys())[i]
         
         result += dataset[x_k] * LFactor(dataset, evalPoint, x_k)
         
@@ -46,7 +46,7 @@ def main():
     
     dataset = {2:func(2),2.75:func(2.75),4:func(4)}
     
-    print(generateLagrangePolynomial(dataset, 3))
+    print(generateLagrangePolynomial(dataset, 3,len(dataset)-1))
     
     
 if __name__ == "__main__":
