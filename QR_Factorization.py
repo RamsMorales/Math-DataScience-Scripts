@@ -9,8 +9,8 @@ import numpy as np
 import scipy as sp
 import matplotlib.pyplot as plt
 import sys
-
-def factorizationQR(matrix: np.ndarray) -> np.ndarray:
+ 
+def factorizationQR(matrix: np.ndarray) -> (np.ndarray, np.ndarray):
     
     numVectors= matrix.shape[0]
     dimensions = matrix.shape[1]
