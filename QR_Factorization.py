@@ -9,11 +9,12 @@ import numpy as np
 import scipy as sp
 import matplotlib.pyplot as plt
 import sys
+import copy
  
 def factorizationQR(matrix: np.ndarray) -> (np.ndarray, np.ndarray):
     
     '''
-    Although the correct answer was being produced, R is not upper triangular so I don't really know if I can use this
+    Although the correct answer was being produced, R is not upper triangular so I cant use this for back-substitution algorithm
     '''
     
     numVectors= matrix.shape[0]
@@ -99,16 +100,91 @@ def solveLinearSystemQR(matrix: np.ndarray, vector: np.ndarray) -> np.ndarray:
         sys.exit()
     
     
+    
+def houselholder(matrix: np.ndarray ) -> (np.ndarray, np.ndarray):
+    
+    try:
+        #*****************************************************************************************************************
+        if(len(matrix.shape) != 2):
+            raise Exception("Invalid dimension. Expected dim 2 but got %d" %(len(matrix.shape)))
+            
+        nRows, nCols = matrix.shape[0],matrix.shape[1]
+        
+        #calculate rank of matrix
+        rank = np.linalg.matrix_rank(matrix)
+
+            
+        if rank != nCols:
+            raise Exception("Invalid Rank. Expected %d but got %d" % (nCols,rank))
+        #*****************************************************************************************************************
+        
+        #Set R to be a copy of our input matrix
+        R = copy.deepcopy(matrix)
+        
+        #Set Q to the m x m Identity matrix
+        Q = np.eye(nRows)
+        
+        #defining sign lambda calc function
+        sign = lambda x: 1 if x >= 0 else -1
+        
+        for k in range(nCols):
+            #let U be a copy of R from kth row forward on the kth column. Deep copy is so we don't modify R yet
+            U = copy.deepcopy(R[k:,k])
+            #add sign * magnitude of U to the first element of u
+            U[0] += sign(U[0]) * np.linalg.norm(U)
+            #normolize u
+            U = U * (np.linalg.norm(U) ** -1)
+            #modify R with reflection
+            R[k:,k:] = R[k:,k:] - (2 * np.outer(U,U.T @ R[k:,k:]))
+            #modify Q with reflection
+            Q[k:,:] = Q[k:,:] - (2 * np.outer(U,U.T @ Q[k:,:]))
+            
+        return Q.T, R
+            
+            
+            
+
+        
+        
+        
+        
+            
+    except Exception as e:
+        print(e)
+        sys.exit()
+    
+        
 
 
 def main():
-    #test system with known solution x = [-1 1].T
+   
     A = np.array([[1,2,3],[0,1,5],[5,6,0]])
-    #A = np.array([[1,1],[1,2]])
     b = np.array([[0],[1],[17]])
+    #test system with known solution x = [-1 1].T
+    #A = np.array([[1,1],[1,2]])
+    #b = np.array([[0],[1]])
     
+    print("The following is the solution printout for Exercise 1:\n")
     solution = solveLinearSystemQR(A, b)
     print(solution)
+
+    print("\nThe following is the solution printout for Exercise 2:\n")
+    
+    A = np.random.random((5,3))
+    Q1,R1 = sp.linalg.qr(A)
+    
+    print("Shape for SciPy qr A.shape, Q.shape, R.shape\n")
+    print(A.shape,Q1.shape,R1.shape)
+    print("\nA is within tolerance of QR from SciPy")
+    print(np.allclose(Q1 @ R1, A))
+    print("A is within tolerance of QR from native HouseHolder")    
+    Q2,R2 = houselholder(A)
+    
+    print(np.allclose(Q2 @ R2, A))
+    
+    
+    
+    
     
 if __name__=="__main__":
     main()
