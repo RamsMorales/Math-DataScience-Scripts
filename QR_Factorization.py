@@ -12,6 +12,10 @@ import sys
  
 def factorizationQR(matrix: np.ndarray) -> (np.ndarray, np.ndarray):
     
+    '''
+    Although the correct answer was being produced, R is not upper triangular so I don't really know if I can use this
+    '''
+    
     numVectors= matrix.shape[0]
     dimensions = matrix.shape[1]
     
@@ -30,6 +34,8 @@ def factorizationQR(matrix: np.ndarray) -> (np.ndarray, np.ndarray):
     R = Q.T @ matrix
             
     return Q, R
+
+
 
 def solveLinearSystemQR(matrix: np.ndarray, vector: np.ndarray) -> np.ndarray:
     
@@ -58,14 +64,28 @@ def solveLinearSystemQR(matrix: np.ndarray, vector: np.ndarray) -> np.ndarray:
         '''
         Solving the system of equations with QR factorization. 
         '''
-        Q,R = factorizationQR(matrix)
+        Q,R = sp.linalg.qr(matrix)
         
-        transposeQ = Q.T
         
-        y = transposeQ @ vector # y = Q.T @ b
+        y =  Q.T @ vector # y = Q.T @ b
         
-        solution = np.linalg.inv(R) @ y # back substitution to find x
         
+        x = np.zeros(y.shape) # initialize x
+        
+        #Back substitution algorithm
+        for i in range(x.shape[0]-1,-1,-1):
+            if i+1 == x.shape[0]:
+                x[i] = y[i] / R[i][i]
+            elif i < 0:
+                break
+            else:
+                x[i] = (y[i] - R[i,i+1:] @ x[i+1:]) / R[i][i]
+
+            
+        
+        solution = x
+        
+        print("Residual is %.e\n" %(np.linalg.norm(vector - (matrix @ solution))))
         
         return solution
         
@@ -82,13 +102,13 @@ def solveLinearSystemQR(matrix: np.ndarray, vector: np.ndarray) -> np.ndarray:
 
 
 def main():
-    #test system with known solution x = [1 -1].T
-    A = np.array([[1,1],[2,1]])
+    #test system with known solution x = [-1 1].T
+    A = np.array([[1,2,3],[0,1,5],[5,6,0]])
+    #A = np.array([[1,1],[1,2]])
+    b = np.array([[0],[1],[17]])
     
-    b = np.array([[0],[1]])
-    
-    
-    print(solveLinearSystemQR(A,b)) # it worked
+    solution = solveLinearSystemQR(A, b)
+    print(solution)
     
 if __name__=="__main__":
     main()
