@@ -8,6 +8,8 @@ Created on Mon Oct 14 16:20:37 2024
 import numpy as np
 import scipy as sp
 import sys
+import timeit
+import matplotlib.pyplot as plt
 
 def computeLU(matrix: np.ndarray) -> (np.ndarray,np.ndarray):
     
@@ -92,7 +94,86 @@ def solveLinearSystemLU(matrix: np.ndarray, vector: np.ndarray) ->np.ndarray:
         
         print(e)
         sys.exit
+
+def problem2():
     
+    '''
+    This is a runtime analysis for different matrix method to solve systems of linear equations.
+    '''
+    
+
+    
+    MAXSIZE = 1000
+    
+    durationINV = {} #duration for solving using inverse
+    durationSLV = {} #duration for solving using sp.linalg.solve
+    durationSLU = {} #duration for solving using lu_solve and lu_factor
+    durationLUS = {} #duration timing only the lu_solve step
+    
+    
+    
+    for n in range(100,MAXSIZE + 100,100):
+        
+        randomMatrix = np.random.rand(n,n)
+        
+        
+        randomVector = np.random.random(n)
+        start = timeit.default_timer()
+        
+        sp.linalg.inv(randomMatrix) @ randomVector
+        
+        stop = timeit.default_timer()
+        
+        durationINV[n] = stop - start
+        
+        #---------------------------------------------------------
+        
+        start = timeit.default_timer()
+        
+        sp.linalg.solve(randomMatrix,randomVector)
+        
+        stop = timeit.default_timer()
+        
+        durationSLV[n] = stop - start
+        
+        #---------------------------------------------------------
+        
+        start = timeit.default_timer()
+        
+        sp.linalg.lu_solve(sp.linalg.lu_factor(randomMatrix),randomVector)
+        
+        stop = timeit.default_timer()
+        
+        durationSLU[n] = stop - start
+        
+        #---------------------------------------------------------
+        
+        
+        matrix = sp.linalg.lu_factor(randomMatrix)
+        
+        start = timeit.default_timer()
+        
+        sp.linalg.lu_solve(matrix,randomVector)
+        
+        stop = timeit.default_timer()
+        
+        durationLUS[n] = stop - start
+        
+        
+    durations = [durationINV,durationSLV,durationSLU,durationLUS]
+    
+    labels = ["Using inverse", "Using linalg.solve()", "Using lu_factor & lu_solve", "lu_solve alone"]
+    
+    label = 0
+        
+    for duration in durations: 
+        plt.loglog(duration.keys(),duration.values(),label=labels[label])
+        
+        label += 1
+        
+    plt.legend()
+    plt.xlabel('System size', fontsize=18)
+    plt.ylabel('log of time in seconds', fontsize=16)
     
     
 def main():
@@ -105,6 +186,15 @@ def main():
     
     print("The solution for exercise 1 is: ")
     print(solveLinearSystemLU(A, b))
+
+    problem2()
+    
+
+    
+    
+    
+    
     
 if __name__ == "__main__":
     main()
+    #problem2()
